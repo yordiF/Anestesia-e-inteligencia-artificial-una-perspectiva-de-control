@@ -27,7 +27,8 @@ El trabajo se organiza en cinco etapas:
 | `Adquirir_Datos.ipynb` | 1 | Filtrado de calidad de los casos de VitalDB: porcentaje de datos faltantes en los volúmenes de infusión y huecos de 30 s o más en el BIS. Recorte sincronizado de las señales y descarga de los datos demográficos. |
 | `Procesar_y_limpiar_datos.ipynb` | 1 | Limpieza de las señales: los valores de BIS inferiores a 20 y los volúmenes acumulados decrecientes se sustituyen por interpolación lineal. Remuestreo en bloques de 10 s (tasas de infusión y BIS promedio), suavizado LOWESS (únicamente en el conjunto de entrenamiento) y normalización mínimo-máximo de las covariables. |
 | `estats_covariables.ipynb` | 1 | Estadística descriptiva de la población (640 pacientes: 357 hombres y 283 mujeres), total y estratificada por sexo. |
-| `Crea_tensores_pytorch.ipynb` | 1 | Cálculo de las estadísticas globales de normalización sobre el conjunto de entrenamiento (`estadisticas_normalizacion.json`) y generación de las ventanas deslizantes de 180 muestras mediante el módulo de normalización `Normalizacion_BIS.py`. Los conjuntos de entrenamiento, validación y prueba se exportan como tensores `.pt`. |
+| `Normalizacion_BIS.py` | 1 | Funciones comunes para construir y normalizar las ventanas de entrada de los predictores del BIS: normalización global con la media y la desviación estándar del conjunto de entrenamiento, relleno con cero en las infusiones y con el primer valor en el BIS, y alineación de cada ventana, que termina en el instante *n*, con la etiqueta BIS[*n*+1]. Lo emplean todas las libretas que entrenan, evalúan o simulan los modelos. |
+| `Crea_tensores_pytorch.ipynb` | 1 | Cálculo de las estadísticas globales de normalización sobre el conjunto de entrenamiento (`estadisticas_normalizacion.json`) y generación de las ventanas deslizantes de 180 muestras mediante `Normalizacion_BIS.py`. Los conjuntos de entrenamiento, validación y prueba se exportan como tensores `.pt`. |
 | `Modelo_LSTM_BIS.py` | 2 | Definición de `ModeloLSTMBIS`: dos redes LSTM independientes (una por fármaco) y un regresor MLP. |
 | `Modelo_LSTM_BIS_SLD.ipynb` | 2 | Entrenamiento de la LSTM de referencia con una pérdida ponderada por la densidad de las etiquetas (LDS, *Label Distribution Smoothing*; denominada SLD en la libreta). |
 | `Modelo_Predictor_BIS.py` | 2 | Definición de `ModeloAnestesia`, el predictor híbrido compuesto por tres bloques (véase la sección de modelos). |
@@ -45,8 +46,6 @@ El trabajo se organiza en cinco etapas:
 | `Comparacion_KNN_AG_Mediana.ipynb` | 5 | Simulación, con la misma planta virtual, de las ganancias del algoritmo genético, de las estimadas por la heurística KNN y de un controlador de parámetros medianos, en el conjunto de estimación y en los casos con sintonización deficiente; incluye el tiempo de cómputo de la heurística y las pruebas de Wilcoxon (Tablas 5.10 y 5.11). |
 
 ### Archivos de datos
-
-Los archivos de datos no se incluyen en este repositorio. A continuación se describen los archivos que emplean o generan las libretas, con el fin de documentar el flujo de trabajo.
 
 | Archivo | Origen | Descripción |
 |---|---|---|
@@ -164,7 +163,7 @@ pip install torch vitaldb numpy pandas scipy statsmodels matplotlib seaborn
 11. `Analisis_Estadistico_Modelos_BIS.ipynb`, `Analisis_Estadistico_Arquitecturas_E3.ipynb` y `Estadisticas_Base_Sintonizaciones.ipynb` (independientes entre sí)
 12. `Comparacion_KNN_AG_Mediana.ipynb`
 
-> **Nota:** en varias libretas, las rutas de entrada y de salida se definen como rutas absolutas en la sección de configuración. Antes de ejecutarlas, dichas rutas deben ajustarse al entorno local. Las libretas del paso 11 requieren únicamente los archivos de datos descritos en la sección «Archivos de datos».
+> **Nota:** en varias libretas, las rutas de entrada y de salida se definen como rutas absolutas en la sección de configuración. Antes de ejecutarlas, dichas rutas deben ajustarse al entorno local. Las libretas del paso 11 emplean únicamente los archivos de datos descritos en la sección «Archivos de datos».
 
 ---
 
